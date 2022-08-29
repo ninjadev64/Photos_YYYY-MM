@@ -1,0 +1,9 @@
+src/main/resources/credentials.json
+Photos/
+
+.idea/
+
+node_modules/
+target/
+package-lock.json
+webpack.generated.js
