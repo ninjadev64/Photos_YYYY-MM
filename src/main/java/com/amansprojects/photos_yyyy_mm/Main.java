@@ -24,11 +24,14 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
 
 @Route
 @CssImport("./styles/shared-styles.css")
 @CssImport(value = "./styles/vaadin-text-field-styles.css", themeFor = "vaadin-text-field")
 public class Main extends VerticalLayout {
+    public record Item(String url, boolean video, String filename) { }
+
     static PhotosLibraryClient client = null;
 
     public Main() {
@@ -67,9 +70,13 @@ public class Main extends VerticalLayout {
         );
 
         int count = 0;
+        ArrayList<Item> items = new ArrayList<Item>();
         for (MediaItem item : response.iterateAll()) {
+            items.add(new Item(item.getBaseUrl(), item.getMediaMetadata().hasVideo(), item.getFilename()));
+        }
+        for (Item item : items) {
             try {
-                String url = item.getBaseUrl() + (item.getMediaMetadata().hasVideo() ? "=dv-no" : "=d");
+                String url = item.url + (item.video ? "=dv-no" : "=d");
 
                 File directory = new File("Photos/" + year+"/"+year+"-"+String.format("%02d", month));
                 if (!directory.exists()) {
@@ -81,7 +88,7 @@ public class Main extends VerticalLayout {
 
                 InputStream in = new URL(url).openStream();
                 FileOutputStream fos = new FileOutputStream(
-                    directory.getCanonicalPath() + "/" + item.getFilename()
+                    directory.getCanonicalPath() + "/" + item.filename
                 );
                 ReadableByteChannel rbc = Channels.newChannel(in);
 
